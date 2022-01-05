@@ -1,0 +1,10 @@
+{
+    "[go]": {
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": "golang.go"
+},
+"gopls": {
+    "ui.completion.usePlaceholders": true,
+    "symbolStyle": "Dynamic",
+  },
+}
