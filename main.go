@@ -1,10 +1,7 @@
 package main
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -12,46 +9,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	dbUsername = "root"
-	dbPassword = "password"
-	dbHost = "127.0.0.1"
-	dbPort = "3306"
-	serverHost = "127.0.0.1"
-	serverPort = "8001"
-)
-
-func getDSNinfo() string{
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/", dbUsername, dbPassword, dbHost, dbPort)
-}
-
-
-func main(){
-	var dir string
-
-	dbname := "gotestdb"
+func main() {
 
 	router := mux.NewRouter()
+	static_dir := makeStaticDir()
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(static_dir))))
+	router.Use(mux.CORSMethodMiddleware(router))
 
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
-
-	db, err := sql.Open("mysql", getDSNinfo())
-
-	if err != nil {
-        log.Printf("Error %s when connecting DB\n", err)
-        return
-	}
-	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
-    defer cancelfunc()
-
-    _, err = db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
-	if err != nil {
-        log.Printf("Error %s when creating DB\n", err)
-        return
-	}
-    
-	fmt.Println("connected to database ...")
-    
 	srv := &http.Server{
 		Handler: router,
 		Addr:    fmt.Sprintf("%s:%s", serverHost, serverPort),
@@ -59,9 +23,8 @@ func main(){
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	fmt.Println("server startup completed")
+	InfoLogger.Println("Application Startup Complete")
 
-	log.Fatal(srv.ListenAndServe())
-	defer db.Close()
-	
+	InfoLogger.Fatal(srv.ListenAndServe())
+
 }
