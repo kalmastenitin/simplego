@@ -12,7 +12,7 @@ import (
 
 const (
 	dbUsername = "root"
-	dbPassword = "toolkitsecret"
+	dbPassword = "password"
 	dbHost     = "127.0.0.1"
 	dbPort     = "3306"
 	serverHost = "127.0.0.1"
